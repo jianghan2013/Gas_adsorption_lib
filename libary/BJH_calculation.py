@@ -226,7 +226,11 @@ def BJH(p,Q,gas_type='N2'):
     Vd = np.zeros(n_step)
     Vc = np.zeros(n_step)
     dV_desorp= np.zeros(n_step)
-    status = np.zeros(n_step)
+	
+	# Status: the adsorption status for each step, it is initiated with 0, 
+	# If it is 1, then no new pores are created. If it is 2, then addtional new 
+	# pores are created. 
+    status = np.zeros(n_step) 
     tw = np.zeros(n_point)
     #print('old tw/status',n_point,n_step,tw,status)
 
@@ -248,17 +252,17 @@ def BJH(p,Q,gas_type='N2'):
     tw[1] = thickness_Harkins_Jura(p_rels[1])
     #print('Rc[1]/tw[1]',Rc[1],tw[1])
     k=0
-    for istep in range(1,n_step+1):
+    for istep in range(1,n_step): # modified from n_step +1 to n_step
         #print('\nistep/nstep',istep,n_step)
         status[istep]= 0 
-        #print(status)
-        if istep == n_step:
+        # Calculate the thickness of next pressure step(istep+1)
+        if istep == n_step: # don't have this
             tw[istep+1]=0
         else:
             tw[istep+1] = thickness_Harkins_Jura(p_rels[istep+1])
 
         # a) determine Vd 
-        del_tw = tw[istep] - tw[istep+1]
+        del_tw = tw[istep] - tw[istep+1] # change of thickness
         #print('del_tw',del_tw)
         #print('Vd',Vd)
         Vd[istep] = get_CSA_a(del_tw,Davg,LP,k,istep,n_step)
@@ -268,7 +272,7 @@ def BJH(p,Q,gas_type='N2'):
         dV_desorp[istep] = VL[istep] - VL[istep+1]
         #print('dV_desorp',dV_desorp[istep])
         if Vd[istep] >= dV_desorp[istep]: 
-        # case 1: Vd is larger than current increment of volume desorbed dV_desorp[istep], 
+        # True case 1: Vd is larger than current increment of volume desorbed dV_desorp[istep], 
         # desorption from walls only is occuring
             status[istep] = 1
             #print('too large check case ',status[istep])
@@ -284,10 +288,10 @@ def BJH(p,Q,gas_type='N2'):
             #print('normal check case ',status[istep])
             Vc[istep] = dV_desorp[istep]- Vd[istep]
             #print('dV_desorp,Vc',dV_desorp[istep],Vc[istep])
-            k += 1
+            k += 1 # total number of intervals that create new pores + 1
             #print('n_pore',k)
             Rc[k+1]  = kelvin_radius(p_rels[k+1],gas_const)
-            Davg[k] = 2* (Rc[k]+Rc[k+1]) *Rc[k]*Rc[k+1] / (Rc[k]**2+Rc[k+1]**2)
+            Davg[k] = 2* (Rc[k]+Rc[k+1]) *Rc[k]*Rc[k+1] / (Rc[k]**2+Rc[k+1]**2) # mathmatical average
             Pavg[k] = np.exp(-2*gas_const['A'] / Davg[k])
             tw_avg[k] = thickness_Harkins_Jura(Pavg[k])
             del_td = tw_avg[k] - tw[istep+1]
@@ -309,6 +313,8 @@ def BJH(p,Q,gas_type='N2'):
         #print('Davg,Rc,LP',Davg,Rc,LP)
 
         # for test
+        #print('istep',istep)
+        #print('Rc',Rc)
         #temp1 = Davg.dot(LP)
         #Vp = np.pi*LP*(Davg/2.0)**2 *10**(-16)
         #Vp_cum = sum(Vp)
