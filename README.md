@@ -5,7 +5,7 @@ Calculate BJH pore size distribution
 simple example 
 ```python
 from adsorp_libary.BJH_calculation import BJH_method
-solution = BJH_method(gas_type=gas_type)
+solution = BJH_method(gas_type='N2')
 solution.fit_transform(p=p_rels, q=q_abs)
 
 ```

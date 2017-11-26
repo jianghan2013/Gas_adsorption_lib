@@ -4,6 +4,7 @@
 !.gitignore
 !*.IPYNB 
 !*.py   
+!*.xlsx
 # ...even if they are in subdirectories
 !*/
 # ignore ipynb checkpoint folder
